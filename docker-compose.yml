@@ -1,0 +1,43 @@
+version: "2"
+
+services:
+  sniproxy:
+    build:
+      context: ./
+      dockerfile: Dockerfile-sniproxy
+    image: alpine-sniproxy:local
+    container_name: sniproxy
+    networks:
+      sniproxy_vlan:
+        ipv4_address: 172.16.62.2
+      sniproxy_dns:
+        aliases:
+          - sniproxy
+    restart: always
+    depends_on:
+      - sniproxy-dnsmasq
+
+  sniproxy-dnsmasq:
+    build:
+      context: ./
+      dockerfile: Dockerfile-dnsmasq
+    image: alpine-dnsmasq:local
+    container_name: sniproxy-dnsmasq
+    privileged: true
+    networks:
+      sniproxy_dns:
+        aliases:
+          - sniproxy-dnsmasq
+    restart: always
+
+networks:
+  sniproxy_dns:
+  sniproxy_vlan:
+    #name: sniproxy_vlan
+    driver: macvlan
+    driver_opts:
+      parent: ens33.62
+    ipam:
+      config:
+        - subnet: 172.16.62.0/30
+          gateway: 172.16.62.1

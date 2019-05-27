@@ -1,0 +1,10 @@
+FROM alpine:latest
+
+RUN apk add --no-cache sniproxy
+
+COPY sniproxy.conf /etc/
+
+EXPOSE 80
+EXPOSE 443
+
+CMD ["sniproxy", "-f"]
