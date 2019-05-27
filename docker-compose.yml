@@ -7,12 +7,12 @@ services:
       dockerfile: Dockerfile-sniproxy
     image: alpine-sniproxy:local
     container_name: sniproxy
+    dns: 172.16.62.3  #Not showed in resolv.conf but still used!
     networks:
       sniproxy_vlan:
-        ipv4_address: 172.16.62.2
-      sniproxy_dns:
         aliases:
           - sniproxy
+        ipv4_address: 172.16.62.2
     restart: always
     depends_on:
       - sniproxy-dnsmasq
@@ -25,19 +25,18 @@ services:
     container_name: sniproxy-dnsmasq
     privileged: true
     networks:
-      sniproxy_dns:
+      sniproxy_vlan:
         aliases:
-          - sniproxy-dnsmasq
+          - dnsmasq
+        ipv4_address: 172.16.62.3
     restart: always
 
 networks:
-  sniproxy_dns:
   sniproxy_vlan:
-    #name: sniproxy_vlan
     driver: macvlan
     driver_opts:
-      parent: ens33.62
+      parent: enp1s0.62
     ipam:
       config:
-        - subnet: 172.16.62.0/30
+        - subnet: 172.16.62.0/29
           gateway: 172.16.62.1
